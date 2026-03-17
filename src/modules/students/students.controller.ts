@@ -83,14 +83,17 @@ export class StudentsController {
   }
 
   @UseGuards(AuthGuard, RolesGuard)
-    @Roles(Role.ADMIN, Role.SUPERADMIN)
-    @Put(":id")
-    updateStudent(@Param('id') id: string, @Body() payload: UpdateStudentDto) {
-      return this.studentsService.updateStudent(+id, payload);
-    }
-  
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles(Role.ADMIN, Role.SUPERADMIN)
-    @Delete(":id")
-    deleteStudent(@Param('id') id: string) {}
+  @Roles(Role.ADMIN, Role.SUPERADMIN)
+  @Put(':id')
+  updateStudent(@Param('id') id: string, @Body() payload: UpdateStudentDto) {
+    return this.studentsService.updateStudent(+id, payload);
+  }
+
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.SUPERADMIN)
+  @Delete(':id')
+  deleteStudent(@Param('id') id: string) {
+    return this.studentsService.deleteStudent(+id);
+  }
 }

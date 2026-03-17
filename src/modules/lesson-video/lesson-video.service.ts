@@ -4,7 +4,7 @@ import { PrismaService } from 'src/database/prisma.service';
 import { Role } from '@prisma/client';
 import { title } from 'process';
 import { UpdateLessonVideoDto } from './dto/update-lesson-video.dto';
-// import { UpdateLessonVideoDto } from './dto/update-lesson-video.dto';
+
 
 @Injectable()
 export class LessonVideoService {
@@ -123,6 +123,11 @@ export class LessonVideoService {
           throw new NotFoundException('lesson video is Not found');
         }
         await this.prisma.lessonVideo.delete({ where: { id } });
+
+        return {
+          success: true,
+          message: 'lesson video deleted successfully',
+        };
 
       }
 }

@@ -1,8 +1,6 @@
-import {
-  IsString,
-  IsNumber,
-} from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Status } from '@prisma/client';
 
 export class CreateRoomDto {
   @ApiProperty()
@@ -12,4 +10,9 @@ export class CreateRoomDto {
   @ApiProperty()
   @IsNumber()
   capacity: number;
+
+  @ApiProperty({ enum: Status, required: false })
+  @IsOptional()
+  @IsEnum(Status)
+  status?: Status;
 }

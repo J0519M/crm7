@@ -88,7 +88,12 @@ export class homeworkResponseService {
         throw new NotFoundException('homework response is Not found');
       }
       await this.prisma.homeworkResponse.delete({ where: { id } });
+
+      return {
+        success: true,
+        message: 'homework response deleted successfully',
         
       }
+    }
       
 }

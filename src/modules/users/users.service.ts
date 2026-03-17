@@ -83,5 +83,10 @@ export class UsersService {
       throw new NotFoundException('User is Not found');
     }
     await this.prisma.user.delete({ where: { id } });
+
+    return {
+      success: true,
+      message: 'User deleted successfully',
+    };
   }
 }

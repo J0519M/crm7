@@ -132,7 +132,7 @@ model Room {
   id         Int        @id @default(autoincrement())
   name       String     @unique
   capacity   Int
-  status     UserStatus @default(ACTIVE)
+  status     Status @default(ACTIVE)
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
   groups     Group[]

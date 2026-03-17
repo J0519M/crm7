@@ -78,5 +78,10 @@ export class RatingService {
     }
     await this.prisma.rating.delete({ where: { id } });
 
+    return {
+      success: true,
+      message: 'rating deleted successfully',
+    };
+
   }
 }

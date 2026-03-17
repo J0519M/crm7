@@ -69,5 +69,10 @@ export class RoomsService {
       }
       await this.prisma.room.delete({ where: { id } });
 
+      return {
+        success: true,
+        message: 'room deleted successfully',
+      };
+
     }
 }

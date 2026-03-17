@@ -14,7 +14,7 @@ export class TeachersService {
 
   async createTeacher(payload: CreateTeacherDto, filename: string) {
 
-         // 1️⃣ Avval email bazada bormi tekshiramiz
+         
   const existing = await this.prisma.teacher.findUnique({
     where: { email: payload.email },
   });
@@ -86,5 +86,10 @@ export class TeachersService {
       throw new NotFoundException('Teacher is Not found');
     }
     await this.prisma.teacher.delete({ where: { id } });
+
+    return {
+      success: true,
+      message: 'Teacher deleted successfully',
+    };
   }
 }

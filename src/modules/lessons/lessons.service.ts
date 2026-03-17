@@ -88,5 +88,10 @@ export class LessonsService {
         }
         await this.prisma.lesson.delete({ where: { id } });
 
+        return {
+            success: true,
+            message: 'lesson deleted successfully',
+        };
+
     }
 }

@@ -67,5 +67,10 @@ export class CourseService {
         throw new NotFoundException('course is Not found');
       }
       await this.prisma.course.delete({ where: { id } });
+
+      return {
+        success: true,
+        message: 'Course deleted successfully',
+      };
     }
 }

@@ -217,6 +217,11 @@ export class GroupsService {
       throw new NotFoundException('Group is Not found');
     }
     await this.prisma.group.delete({ where: { id } });
+
+    return {
+      success: true,
+      message: 'Group deleted successfully',
+    };
   }
 
 

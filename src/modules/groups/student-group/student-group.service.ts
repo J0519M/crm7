@@ -93,6 +93,11 @@ export class StudentGroupService {
       throw new NotFoundException('StudentGroup is Not found');
     }
     await this.prisma.studentGroup.delete({ where: { id } });
+
+    return {
+      success: true,
+      message: 'StudentGroup deleted successfully',
+    };
   }
 
 

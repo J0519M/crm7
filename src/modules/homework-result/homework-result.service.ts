@@ -82,5 +82,10 @@ export class HomeworkResultService {
     }
     await this.prisma.homeworkResult.delete({ where: { id } });
 
+    return {
+      success: true,
+      message: 'homework result deleted successfully',
+    };
+
   }
 }
