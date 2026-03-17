@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { CreateUserDto } from './dto/create.user.dto';
 import { hashPassword } from 'src/common/config/bcrypt';
@@ -7,68 +7,81 @@ import { UpdateUserDto } from './dto/update.user.dto';
 
 @Injectable()
 export class UsersService {
-    constructor(
-        private prisma: PrismaService,
-        private mailerService: MailerService
-    ) { }
+  constructor(
+    private prisma: PrismaService,
+    private mailerService: MailerService,
+  ) {}
 
-    async createUser(payload: CreateUserDto, filename: string) {
-        await this.prisma.user.create({
-            data: {
-                ...payload,
-                password: await hashPassword(payload.password),
-                hire_date: new Date(payload.hire_date),
-                photo: filename ?? null
-            }
-        })
+  async createUser(payload: CreateUserDto, filename: string) {
+    const existUser = await this.prisma.user.findUnique({
+    where: { email: payload.email },
+  });
 
-        await this.mailerService.sendEmail(payload.email, payload.email, payload.password)
+  if (existUser) {
+    throw new ConflictException('Email already exists');
+  }
 
-        return {
-            success: true,
-            message: "User successfully created"
-        }
+
+    await this.prisma.user.create({
+      data: {
+        ...payload,
+        password: await hashPassword(payload.password),
+        hire_date: new Date(payload.hire_date),
+        photo: filename ?? null,
+      },
+    });
+
+    await this.mailerService.sendEmail(
+      payload.email,
+      payload.email,
+      payload.password,
+    );
+
+    return {
+      success: true,
+      message: 'User successfully created',
+    };
+  }
+
+  async getAllUsers() {
+    const users = await this.prisma.user.findMany();
+
+    return {
+      success: true,
+      data: users,
+    };
+  }
+
+  async getOneUser(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User is Not found');
     }
 
-    async getAllUsers() {
-        const users = await this.prisma.user.findMany();
+    return {
+      success: true,
+      data: user,
+    };
+  }
 
-        return {
-            success: true,
-            data: users
-        }
+  async updateUser(id: number, payload: UpdateUserDto) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User is Not found');
     }
+    await this.prisma.user.update({ where: { id }, data: payload });
 
-    async getOneUser(id: number) {
-        const user = await this.prisma.user.findUnique({ where: { id } });
-        if (!user) {
-            throw new NotFoundException("User is Not found");
-        }
+    return {
+      success: true,
+      message: 'User updated successfully',
+    };
+  }
 
-        return {
-            success: true,
-            data: user
-        }
+  async deleteUser(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User is Not found');
     }
-
-    async updateUser(id: number, payload: UpdateUserDto) {
-        const user = await this.prisma.user.findUnique({ where: { id } });
-        if (!user) {
-            throw new NotFoundException("User is Not found");
-        }
-        await this.prisma.user.update({ where: { id }, data: payload });
-
-        return {
-            success: true,
-            message: "User updated successfully"
-        }
-    }
-
-    async deleteUser(id: number){
-        const user = await this.prisma.user.findUnique({ where: { id } });
-        if (!user) {
-            throw new NotFoundException("User is Not found");
-        }
-        await this.prisma.user.delete({where: {id}});   
-    }
+    await this.prisma.user.delete({ where: { id } });
+  }
 }

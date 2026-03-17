@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
 enum Status {
   ACTIVE
   INACTIVE
@@ -25,12 +31,6 @@ enum Role {
   TEACHER
   MANAGEMENT
   ADMINSTRATOR
-}
-
-enum CourseLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
 }
 
 enum WeekDays {
@@ -84,7 +84,7 @@ model Teacher {
   photo           String?
   password        String
   position        String
-  experience      Int
+  experience       Int
   status          UserStatus       @default(ACTIVE)
   created_at      DateTime         @default(now())
   updated_at      DateTime         @updatedAt
@@ -93,47 +93,48 @@ model Teacher {
   lessons         Lesson[]
   homework        Homework[]
   lessonVideos    LessonVideo[]
-  ratings         Rating[]
   homeworkResults HomeworkResult[]
+  ratings         Rating[]
 }
 
 model Student {
-  id                Int                @id @default(autoincrement())
-  fullName          String
-  email             String             @unique
-  photo             String?
-  password          String
-  birth_date        DateTime
-  status            UserStatus         @default(ACTIVE)
-  created_at        DateTime           @default(now())
-  updated_at        DateTime           @updatedAt
+  id         Int        @id @default(autoincrement())
+  fullName   String
+  email      String     @unique
+  photo      String?
+  password   String
+  birth_date DateTime
+  status     UserStatus @default(ACTIVE)
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+
   studentGroups     StudentGroup[]
   attendances       Attendance[]
-  homeworkResults   HomeworkResult[]
   homeworkResponses HomeworkResponse[]
+  homeworkResults   HomeworkResult[]
 }
 
 model Course {
   id             Int          @id @default(autoincrement())
   name           String       @unique
+  description    String?
+  status         Status       @default(ACTIVE)
   durationMonth  Int
   durationLesson Int
-  status         Status       @default(ACTIVE)
   level          CourseLevel?
   price          Decimal
-  description    String?
   created_at     DateTime     @default(now())
   updated_at     DateTime     @updatedAt
   groups         Group[]
 }
 
 model Room {
-  id         Int      @id @default(autoincrement())
-  name       String   @unique
+  id         Int        @id @default(autoincrement())
+  name       String     @unique
   capacity   Int
-  status     Status   @default(ACTIVE)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  status     UserStatus @default(ACTIVE)
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
   groups     Group[]
 }
 
@@ -142,33 +143,32 @@ model Group {
   teacherId  Int
   userId     Int
   roomId     Int
-  courseId   Int
+  courseId   Int        @unique
   name       String     @unique
+  capacity   Int        @default(20)
   startDate  DateTime
   startTime  String
   weekDays   WeekDays[]
-  status     Status     @default(ACTIVE)
+  status     UserStatus @default(ACTIVE)
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
 
-  studentGroup StudentGroup[]
-  teacher      Teacher        @relation(fields: [teacherId], references: [id])
-  user         User           @relation(fields: [userId], references: [id])
-  room         Room           @relation(fields: [roomId], references: [id])
-  course       Course         @relation(fields: [courseId], references: [id])
-  lessons      Lesson[]
-
-  @@unique([courseId, name])
+  studentGroups StudentGroup[]
+  teacher       Teacher        @relation(fields: [teacherId], references: [id])
+  room          Room           @relation(fields: [roomId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  course        Course         @relation(fields: [courseId], references: [id])
+  lessons       Lesson[]
 }
 
 model StudentGroup {
-  id         Int      @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   userId     Int
   groupId    Int
   studentId  Int
-  status     Status   @default(ACTIVE)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  status     UserStatus @default(ACTIVE)
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
 
   user    User    @relation(fields: [userId], references: [id])
   group   Group   @relation(fields: [groupId], references: [id])
@@ -178,13 +178,13 @@ model StudentGroup {
 }
 
 model Lesson {
-  id         Int      @id @default(autoincrement())
-  groupId    Int
-  title      String
-  userId     Int?
-  teacherId  Int?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  groupId     Int
+  userId      Int?
+  teacherId   Int?
+  title       String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   group        Group         @relation(fields: [groupId], references: [id])
   teacher      Teacher?      @relation(fields: [teacherId], references: [id])
@@ -198,24 +198,25 @@ model Lesson {
 model Attendance {
   id         Int      @id @default(autoincrement())
   lessonId   Int
-  userId     Int?
   teacherId  Int?
+  userId     Int?
   studentId  Int
   isPresent  Boolean
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   teacher Teacher? @relation(fields: [teacherId], references: [id])
+  lesson  Lesson   @relation(fields: [lessonId], references: [id])
   user    User?    @relation(fields: [userId], references: [id])
   student Student  @relation(fields: [studentId], references: [id])
-  lesson  Lesson   @relation(fields: [lessonId], references: [id])
 }
 
 model Homework {
   id           Int      @id @default(autoincrement())
   lessonId     Int
-  userId       Int?
+  groupId      Int
   teacherId    Int?
+  userId       Int?
   title        String
   file         String?
   durationTime Int      @default(16)
@@ -223,23 +224,25 @@ model Homework {
   updated_at   DateTime @updatedAt
 
   teacher           Teacher?           @relation(fields: [teacherId], references: [id])
-  user              User?              @relation(fields: [userId], references: [id])
   lesson            Lesson             @relation(fields: [lessonId], references: [id])
-  homeworkResults   HomeworkResult[]
+  user              User?              @relation(fields: [userId], references: [id])
   homeworkResponses HomeworkResponse[]
+  homeworkResults   HomeworkResult[]
 }
 
 model LessonVideo {
-  id         Int      @id @default(autoincrement())
-  lessonId   Int
-  userId     Int?
-  teacherId  Int?
-  file       String
+  id        Int    @id @default(autoincrement())
+  lessonId  Int
+  groupId   Int
+  teacherId Int?
+  userId    Int?
+  file      String
+
   created_at DateTime @default(now())
 
   teacher Teacher? @relation(fields: [teacherId], references: [id])
-  user    User?    @relation(fields: [userId], references: [id])
   lesson  Lesson   @relation(fields: [lessonId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id])
 }
 
 model HomeworkResponse {
@@ -252,16 +255,16 @@ model HomeworkResponse {
   created_at DateTime              @default(now())
   updated_at DateTime              @updatedAt
 
-  student  Student  @relation(fields: [studentId], references: [id])
   homework Homework @relation(fields: [homeworkId], references: [id])
+  student  Student  @relation(fields: [studentId], references: [id])
 }
 
 model HomeworkResult {
   id         Int            @id @default(autoincrement())
   homeworkId Int
   studentId  Int
-  userId     Int?
   teacherId  Int?
+  userId     Int?
   title      String
   file       String?
   score      Int
@@ -269,10 +272,10 @@ model HomeworkResult {
   created_at DateTime       @default(now())
   updated_at DateTime       @updatedAt
 
+  homework Homework @relation(fields: [homeworkId], references: [id])
+  student  Student  @relation(fields: [studentId], references: [id])
   teacher  Teacher? @relation(fields: [teacherId], references: [id])
   user     User?    @relation(fields: [userId], references: [id])
-  student  Student  @relation(fields: [studentId], references: [id])
-  homework Homework @relation(fields: [homeworkId], references: [id])
 }
 
 model Rating {
@@ -282,6 +285,6 @@ model Rating {
   score      Int
   created_at DateTime @default(now())
 
-  teacher Teacher @relation(fields: [teacherId], references: [id])
-  lesson  Lesson  @relation(fields: [lessonId], references: [id])
+  teacher Teacher? @relation(fields: [teacherId], references: [id])
+  lesson  Lesson   @relation(fields: [lessonId], references: [id])
 }

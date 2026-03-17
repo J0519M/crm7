@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './database/prisma.module';
-import { ConfigModule } from "@nestjs/config"
+import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
 import { TeachersModule } from './modules/teachers/teachers.module';
 import { MailerModule } from './common/email/email.module';
@@ -11,11 +11,17 @@ import { CourseModule } from './modules/course/course.module';
 import { RoomsModule } from './modules/rooms/rooms.module';
 import { GroupsModule } from './modules/groups/groups.module';
 import { LessonsModule } from './modules/lessons/lessons.module';
+import { AttendanceModule } from './modules/attendance/attendance.module';
+import { HomeworkModule } from './modules/homework/homework.module';
+import { HomeworkResponseModule } from './modules/homework-response/homework-response.module';
+import { LessonVideoModule } from './modules/lesson-video/lesson-video.module';
+import { HomeworkResultModule } from './modules/homework-result/homework-result.module';
+import { RatingModule } from './modules/rating/rating.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ 
-      isGlobal:true
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
     AuthModule,
     PrismaModule,
@@ -26,8 +32,14 @@ import { LessonsModule } from './modules/lessons/lessons.module';
     CourseModule,
     RoomsModule,
     GroupsModule,
-    LessonsModule
+    LessonsModule,
+    AttendanceModule,
+    HomeworkModule,
+    HomeworkResponseModule,
+    LessonVideoModule,
+    HomeworkResultModule,
+    RatingModule,
   ],
-  providers:[UserSeeder]
+  providers: [UserSeeder],
 })
 export class AppModule {}
